@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuke the Korthian</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #222;
+        }
+        #score-board {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 24px;
+            border-radius: 8px;
+            user-select: none;
+            z-index: 10;
+        }
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="score-board">Korthians Nuked: <span id="score">0</span></div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+        let targets = [];
+        let explosions = [];
+
+        // 1. Dein Grasfeld-Hintergrundbild
+        const bgImage = new Image();
+        bgImage.src = 'DEIN_GRASFELD_BILD_URL_HIER'; // Z. B. 'grass.jpg' oder URL
+
+        // 2. Roblox User IDs
+        const robloxUserIds = [12345678, 87654321]; // Füge hier die Roblox IDs ein
+        const avatarImages = [];
+
+        robloxUserIds.forEach(id => {
+            const img = new Image();
+            // Erstellt automatisch Headshots über die Roblox API
+            img.src = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${id}&size=150x150&format=Png`;
+            avatarImages.push(img);
+        });
+
+        // Korthian Objekt
+        class Korthian {
+            constructor() {
+                this.size = 60;
+                this.x = Math.random() * (canvas.width - this.size);
+                this.y = Math.random() * (canvas.height - this.size);
+                this.image = avatarImages[Math.floor(Math.random() * avatarImages.length)];
+            }
+
+            draw() {
+                if (this.image && this.image.complete) {
+                    ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
+                } else {
+                    ctx.fillStyle = 'red';
+                    ctx.fillRect(this.x, this.y, this.size, this.size);
+                }
+            }
+        }
+
+        // Explosions-Effekt
+        class Explosion {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = 10;
+                this.maxRadius = 50;
+                this.alpha = 1;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 69, 0, ${this.alpha})`;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                this.radius += 4;
+                this.alpha -= 0.05;
+            }
+        }
+
+        // Neue Personen spawnen
+        function spawnTarget() {
+            if (targets.length < 10) {
+                targets.push(new Korthian());
+            }
+        }
+        setInterval(spawnTarget, 1000);
+
+        // Klick auf das Spielfeld
+        canvas.addEventListener('click', (e) => {
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+
+            explosions.push(new Explosion(clickX, clickY));
+
+            // Prüfen, ob eine Person getroffen wurde
+            targets = targets.filter(target => {
+                const hit = clickX >= target.x && clickX <= target.x + target.size &&
+                            clickY >= target.y && clickY <= target.y + target.size;
+                
+                if (hit) {
+                    score++;
+                    scoreElement.innerText = score;
+                    return false; // Person verschwindet
+                }
+                return true;
+            });
+        });
+
+        // Game Loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Hintergrund zeichnen
+            if (bgImage.complete && bgImage.src !== '') {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+            } else {
+                ctx.fillStyle = '#4CAF50'; // Standard-Grün als Fallback
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Personen zeichnen
+            targets.forEach(t => t.draw());
+
+            // Explosionen zeichnen und aktualisieren
+            explosions.forEach((exp, index) => {
+                exp.update();
+                exp.draw();
+                if (exp.alpha <= 0) explosions.splice(index, 1);
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
