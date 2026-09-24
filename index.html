@@ -53,22 +53,48 @@
         const robloxUserIds = [8398090850, 10122618116];
         const avatarImages = [];
 
-        robloxUserIds.forEach(id => {
-            const img = new Image();
-            img.src = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${id}&size=150x150&format=Png`;
-            avatarImages.push(img);
-        });
+        async function loadRobloxAvatars() {
+            const idsQuery = robloxUserIds.join(',');
+            const apiUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${idsQuery}&size=150x150&format=Png&isCircular=false`;
+            
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data && data.data) {
+                    data.data.forEach(item => {
+                        if (item.imageUrl) {
+                            const img = new Image();
+                            img.crossOrigin = 'anonymous';
+                            img.src = item.imageUrl;
+                            avatarImages.push(img);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to load Roblox avatars:", err);
+            }
+        }
+
+        loadRobloxAvatars();
 
         class Korthian {
             constructor() {
                 this.size = 60;
                 this.x = Math.random() * (canvas.width - this.size);
-                this.y = Math.random() * (canvas.height - this.size);
-                this.image = avatarImages[Math.floor(Math.random() * avatarImages.length)];
+                
+                const grassTop = canvas.height * 0.6;
+                this.y = grassTop + Math.random() * (canvas.height - grassTop - this.size);
+                
+                if (avatarImages.length > 0) {
+                    this.image = avatarImages[Math.floor(Math.random() * avatarImages.length)];
+                } else {
+                    this.image = null;
+                }
             }
 
             draw() {
-                if (this.image && this.image.complete) {
+                if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
                     ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
                 } else {
                     ctx.fillStyle = 'red';
