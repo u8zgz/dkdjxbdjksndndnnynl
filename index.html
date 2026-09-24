@@ -56,12 +56,10 @@
 
         robloxUserIds.forEach(id => {
             const img = new Image();
-            // Erstellt automatisch Headshots über die Roblox API
             img.src = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${id}&size=150x150&format=Png`;
             avatarImages.push(img);
         });
 
-        // Korthian Objekt
         class Korthian {
             constructor() {
                 this.size = 60;
@@ -80,7 +78,6 @@
             }
         }
 
-        // Explosions-Effekt
         class Explosion {
             constructor(x, y) {
                 this.x = x;
@@ -105,7 +102,6 @@
             }
         }
 
-        // Neue Personen spawnen
         function spawnTarget() {
             if (targets.length < 10) {
                 targets.push(new Korthian());
@@ -113,14 +109,12 @@
         }
         setInterval(spawnTarget, 1000);
 
-        // Klick auf das Spielfeld
         canvas.addEventListener('click', (e) => {
             const clickX = e.clientX;
             const clickY = e.clientY;
 
             explosions.push(new Explosion(clickX, clickY));
 
-            // Prüfen, ob eine Person getroffen wurde
             targets = targets.filter(target => {
                 const hit = clickX >= target.x && clickX <= target.x + target.size &&
                             clickY >= target.y && clickY <= target.y + target.size;
@@ -128,28 +122,24 @@
                 if (hit) {
                     score++;
                     scoreElement.innerText = score;
-                    return false; // Person verschwindet
+                    return false;
                 }
                 return true;
             });
         });
 
-        // Game Loop
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Hintergrund zeichnen
             if (bgImage.complete && bgImage.src !== '') {
                 ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#4CAF50'; // Standard-Grün als Fallback
+                ctx.fillStyle = '#4CAF50';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
-            // Personen zeichnen
             targets.forEach(t => t.draw());
 
-            // Explosionen zeichnen und aktualisieren
             explosions.forEach((exp, index) => {
                 exp.update();
                 exp.draw();
