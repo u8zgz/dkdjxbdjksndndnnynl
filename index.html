@@ -8,6 +8,8 @@
         * {
             box-sizing: border-box;
             touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
         }
         body, html {
             margin: 0;
@@ -23,20 +25,18 @@
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             color: #fff;
             padding: 12px 24px;
             font-size: 22px;
             font-weight: bold;
             border-radius: 8px;
-            user-select: none;
             z-index: 10;
         }
         canvas {
             display: block;
-            width: 100vw;
-            height: 100vh;
-            cursor: crosshair;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -69,40 +69,54 @@
 
         robloxUserIds.forEach(id => {
             const img = new Image();
-            img.crossOrigin = "anonymous";
-            img.src = `https://www.roblox.com/headshot-thumbnail/image?userId=${id}&width=150&height=150&format=png`;
-            
-            img.onerror = () => {
-                img.src = `https://www.roblox.com/avatar-thumbnail/image?userId=${id}&width=150&height=150&format=png`;
-            };
+            img.src = `https://tr.rbxcdn.com/30DAY-AvatarHeadshot-${id}-Png/150/150/AvatarHeadshot/Png`;
             avatarImages.push(img);
         });
 
         class Korthian {
             constructor() {
-                this.size = 75;
+                this.size = 65;
+                const padding = 15;
                 
-                const margin = 10;
-                this.x = margin + Math.random() * (canvas.width - this.size - (margin * 2));
+                this.x = padding + Math.random() * (canvas.width - this.size - (padding * 2));
                 
-                const grassTop = canvas.height * 0.65;
-                const maxGrassY = canvas.height - this.size - margin;
-                this.y = grassTop + Math.random() * Math.max(0, (maxGrassY - grassTop));
+                const grassTop = canvas.height * 0.62;
+                const grassBottom = canvas.height - this.size - padding;
+                this.y = grassTop + Math.random() * Math.max(10, (grassBottom - grassTop));
                 
                 this.image = avatarImages[Math.floor(Math.random() * avatarImages.length)];
             }
 
             draw() {
                 if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
-                    ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
-                } else {
-                    ctx.fillStyle = '#FF3333';
+                    ctx.save();
                     ctx.beginPath();
-                    ctx.arc(this.x + this.size/2, this.y + this.size/2, this.size/2, 0, Math.PI * 2);
-                    ctx.fill();
+                    ctx.arc(this.x + this.size / 2, this.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
+                    ctx.clip();
+                    ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
+                    ctx.restore();
+                    
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.size / 2, this.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
                     ctx.strokeStyle = '#FFFFFF';
                     ctx.lineWidth = 3;
                     ctx.stroke();
+                } else {
+                    ctx.save();
+                    ctx.fillStyle = '#111';
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.size/2, this.y + this.size/2, this.size/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#FFF';
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.size/2, this.y + this.size*0.4, this.size*0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.size/2, this.y + this.size*0.85, this.size*0.3, Math.PI, 0);
+                    ctx.fill();
+                    ctx.restore();
                 }
             }
         }
@@ -111,7 +125,7 @@
             constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.radius = 10;
+                this.radius = 8;
                 this.alpha = 1;
             }
 
@@ -130,18 +144,18 @@
             }
 
             update() {
-                this.radius += 4;
-                this.alpha -= 0.04;
+                this.radius += 5;
+                this.alpha -= 0.05;
             }
         }
 
         setInterval(() => {
-            if (targets.length < 10) {
+            if (targets.length < 8) {
                 targets.push(new Korthian());
             }
         }, 800);
 
-        function handleInteraction(clientX, clientY) {
+        function handleTap(clientX, clientY) {
             const rect = canvas.getBoundingClientRect();
             const posX = clientX - rect.left;
             const posY = clientY - rect.top;
@@ -161,14 +175,12 @@
             });
         }
 
-        canvas.addEventListener('click', (e) => {
-            handleInteraction(e.clientX, e.clientY);
-        });
-
+        canvas.addEventListener('click', (e) => handleTap(e.clientX, e.clientY));
+        
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
-            handleInteraction(touch.clientX, touch.clientY);
+            handleTap(touch.clientX, touch.clientY);
         }, { passive: false });
 
         function animate() {
