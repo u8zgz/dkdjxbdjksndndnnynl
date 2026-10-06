@@ -70,8 +70,6 @@
         const avatar2 = new Image();
         avatar2.src = 'IMG_6848.png';
 
-const avatarImages = [avatar1, avatar2];
-
         const avatarImages = [avatar1, avatar2];
 
         class Korthian {
@@ -79,12 +77,14 @@ const avatarImages = [avatar1, avatar2];
                 this.size = 65;
                 const sidePadding = 20;
                 
-                this.x = sidePadding + Math.random() * (canvas.width - this.size - (sidePadding * 2));
+                this.x = sidePadding + Math.random() * Math.max(10, canvas.width - this.size - (sidePadding * 2));
                 
-                const grassStart = canvas.height * 0.60; 
-                const grassEnd = canvas.height - this.size - 80;
+                const grassStart = canvas.height * 0.50; 
+                const grassEnd = canvas.height - this.size - 20;
                 
-                this.y = grassStart + Math.random() * Math.max(10, (grassEnd - grassStart));
+                const minY = Math.min(grassStart, grassEnd);
+                const maxY = Math.max(grassStart, grassEnd);
+                this.y = minY + Math.random() * (maxY - minY);
                 
                 this.image = avatarImages[Math.floor(Math.random() * avatarImages.length)];
             }
@@ -180,7 +180,7 @@ const avatarImages = [avatar1, avatar2];
             if (bgImage.complete && bgImage.naturalWidth !== 0) {
                 ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#4CAF50';
+                ctx.fillStyle = '#333333';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
