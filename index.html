@@ -112,27 +112,13 @@
 
             draw() {
                 if (this.image && this.image.complete && this.image.naturalWidth !== 0) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(this.x + this.size / 2, this.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
-                    ctx.clip();
                     ctx.drawImage(this.image, this.x, this.y, this.size, this.size);
-                    ctx.restore();
-                    
-                    ctx.beginPath();
-                    ctx.arc(this.x + this.size / 2, this.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
-                    ctx.strokeStyle = '#FFFFFF';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
                 } else {
                     ctx.save();
                     ctx.fillStyle = '#FF3333';
                     ctx.beginPath();
                     ctx.arc(this.x + this.size / 2, this.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
                     ctx.fill();
-                    ctx.strokeStyle = '#FFFFFF';
-                    ctx.lineWidth = 3;
-                    ctx.stroke();
                     ctx.restore();
                 }
             }
