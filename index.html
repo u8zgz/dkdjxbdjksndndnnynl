@@ -61,16 +61,42 @@
         let targets = [];
         let explosions = [];
 
-        function createImage(src) {
-            const img = new Image();
-            img.onerror = () => console.error(`Failed to load image: ${src}`);
-            img.src = src;
-            return img;
+        let loadedImagesCount = 0;
+        const totalImages = 3;
+        let gameStarted = false;
+
+        function onAssetReady() {
+            loadedImagesCount++;
+            if (loadedImagesCount >= totalImages && !gameStarted) {
+                gameStarted = true;
+                console.log("All assets loaded. Starting game loop...");
+                requestAnimationFrame(animate);
+            }
         }
 
-        const bgImage = createImage('./IMG_6834.jpeg');
-        const avatar1 = createImage('./IMG_6847.png');
-        const avatar2 = createImage('./IMG_6848.png');
+        const bgImage = new Image();
+        bgImage.onload = onAssetReady;
+        bgImage.onerror = () => {
+            console.error("Failed to load background image: IMG_6834.jpeg");
+            onAssetReady();
+        };
+        bgImage.src = 'IMG_6834.jpeg';
+
+        const avatar1 = new Image();
+        avatar1.onload = onAssetReady;
+        avatar1.onerror = () => {
+            console.error("Failed to load avatar: IMG_6847.png");
+            onAssetReady();
+        };
+        avatar1.src = 'IMG_6847.png';
+
+        const avatar2 = new Image();
+        avatar2.onload = onAssetReady;
+        avatar2.onerror = () => {
+            console.error("Failed to load avatar: IMG_6848.png");
+            onAssetReady();
+        };
+        avatar2.src = 'IMG_6848.png';
 
         const avatarImages = [avatar1, avatar2];
 
@@ -204,8 +230,6 @@
 
             requestAnimationFrame(animate);
         }
-
-        animate();
     </script>
 </body>
 </html>
