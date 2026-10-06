@@ -18,7 +18,7 @@
             height: 100%;
             overflow: hidden;
             font-family: Arial, sans-serif;
-            background-color: #222;
+            background-color: #1a1a1a;
         }
         #score-board {
             position: absolute;
@@ -61,14 +61,16 @@
         let targets = [];
         let explosions = [];
 
-        const bgImage = new Image();
-        bgImage.src = './IMG_6834.jpeg';
+        function createImage(src) {
+            const img = new Image();
+            img.onerror = () => console.error(`Failed to load image: ${src}`);
+            img.src = src;
+            return img;
+        }
 
-        const avatar1 = new Image();
-        avatar1.src = './IMG_6847.png';
-
-        const avatar2 = new Image();
-        avatar2.src = './IMG_6848.png';
+        const bgImage = createImage('./IMG_6834.jpeg');
+        const avatar1 = createImage('./IMG_6847.png');
+        const avatar2 = createImage('./IMG_6848.png');
 
         const avatarImages = [avatar1, avatar2];
 
@@ -77,14 +79,15 @@
                 this.size = 65;
                 const sidePadding = 20;
                 
-                this.x = sidePadding + Math.random() * Math.max(10, canvas.width - this.size - (sidePadding * 2));
+                const maxX = Math.max(10, canvas.width - this.size - (sidePadding * 2));
+                this.x = sidePadding + Math.random() * maxX;
                 
                 const grassStart = canvas.height * 0.50; 
                 const grassEnd = canvas.height - this.size - 20;
                 
                 const minY = Math.min(grassStart, grassEnd);
                 const maxY = Math.max(grassStart, grassEnd);
-                this.y = minY + Math.random() * (maxY - minY);
+                this.y = minY + Math.random() * Math.max(10, maxY - minY);
                 
                 this.image = avatarImages[Math.floor(Math.random() * avatarImages.length)];
             }
@@ -104,10 +107,15 @@
                     ctx.lineWidth = 3;
                     ctx.stroke();
                 } else {
+                    ctx.save();
                     ctx.fillStyle = '#FF3333';
                     ctx.beginPath();
-                    ctx.arc(this.x + this.size/2, this.y + this.size/2, this.size/2, 0, Math.PI * 2);
+                    ctx.arc(this.x + this.size / 2, this.y + this.size / 2, this.size / 2, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                    ctx.restore();
                 }
             }
         }
@@ -180,7 +188,7 @@
             if (bgImage.complete && bgImage.naturalWidth !== 0) {
                 ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#333333';
+                ctx.fillStyle = '#222222';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
